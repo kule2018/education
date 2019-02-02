@@ -54,14 +54,9 @@ router.get('/advert/add', (req, res, next) => {
  * body: { title, image, link, start_time, end_time }
  */
 router.post('/advert/add', (req, res, next) => {
-  const form = new formidable.IncomingForm()
-  form.uploadDir = config.uploadDir // 配置 formidable 文件上传接收路径
-  form.keepExtensions = true // 配置保持文件原始的扩展名
-  form.parse(req, (err, fields, files) => {
-    if (err) {
-      return next(err)
-    }
-
+pmFormidable(req)
+  .then((result )=>{
+    const [fields, files] = result
     const body = fields // 普通表单字段
     body.image = basename(files.image.path) // 这里解析提取上传的文件名，保存到数据库
 
@@ -73,15 +68,31 @@ router.post('/advert/add', (req, res, next) => {
       end_time: body.end_time,
     })
 
-    advert.save((err, result) => {
-      if (err) {
-        return next(err)
-      }
-      res.json({
-        err_code: 0
-      })
+   return advert.save()
+  })
+  .then(result=>{
+    res.json({
+      err_code:0
     })
   })
+  .catch(err=>{
+next(err)
+  })
+  function pmFormidable(req) {
+  return new Promise((resolve, reject)=>{
+    const form = new formidable.IncomingForm()
+    form.uploadDir = config.uploadDir // 配置 formidable 文件上传接收路径
+    form.keepExtensions = true // 配置保持文件原始的扩展名
+form.parse(req, (err, fields, files)=>{
+  if (err){
+    reject(err)
+  }
+  resolve([fields,files])
+})
+  })
+
+
+  }
 })
 
 router.get('/advert/list', (req, res, next) => {
