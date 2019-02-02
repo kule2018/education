@@ -7,29 +7,42 @@ import { basename } from 'path'
 // 创建一个路由容器，将所有的路由中间件挂载给路由容器
 const router = express.Router()
 
-router.get('/advert', (req, res, next) => {
-  const page = Number.parseInt(req.query.page, 10)
-  const pageSize = 5
-  Advert
-    .find()
-    .skip((page - 1) * pageSize)
-    .limit(pageSize)
-    .exec((err, adverts) => {
-      if (err) {
-        return next(err)
-      }
-      Advert.count((err, count) => {
-        if (err) {
-          return next(err)
-        }
-        const totalPage = Math.ceil(count / pageSize) // 总页码 = 总记录数 / 每页显示大小
-        res.render('advert_list.html', {
-          adverts,
-          totalPage,
-          page
-        })
-      })
+router.get('/advert/count', (req, res, next)=>{
+  Advert.count((err, count)=>{
+    if (err) {
+      return next(err)
+    }
+    res.json({
+      err_code:0,
+      result: count
     })
+  })
+})
+
+router.get('/advert', (req, res, next) => {
+  res.render('advert_list.html')
+  // const page = Number.parseInt(req.query.page, 10)
+  // const pageSize = 5
+  // Advert
+  //   .find()
+  //   .skip((page - 1) * pageSize)
+  //   .limit(pageSize)
+  //   .exec((err, adverts) => {
+  //     if (err) {
+  //       return next(err)
+  //     }
+  //     Advert.count((err, count) => {
+  //       if (err) {
+  //         return next(err)
+  //       }
+  //       const totalPage = Math.ceil(count / pageSize) // 总页码 = 总记录数 / 每页显示大小
+  //       res.render('advert_list.html', {
+  //         adverts,
+  //         totalPage,
+  //         page
+  //       })
+  //     })
+  //   })
 })
 
 router.get('/advert/add', (req, res, next) => {
@@ -72,15 +85,22 @@ router.post('/advert/add', (req, res, next) => {
 })
 
 router.get('/advert/list', (req, res, next) => {
-  Advert.find((err, docs) => {
-    if (err) {
-      return next(err)
-    }
-    res.json({
-      err_code: 0,
-      result: docs
+  let {page, pageSize} = req.query
+  page = Number.parseFloat(page)
+  pageSize = Number.parseFloat(pageSize)
+  Advert
+    .find()
+    .skip((page-1)*pageSize)
+    .limit(pageSize)
+    .exec((err, advert)=>{
+      if (err) {
+        return next(err)
+      }
+      res.json({
+        err_code: 0,
+        result: advert
+      })
     })
-  })
 })
 
 // /advert/one/:advertId 是一个模糊匹配路径

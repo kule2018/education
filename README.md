@@ -402,7 +402,7 @@ require('你的核心功能代码入口文件模块')
 | POST     | /advert/add |            | image、link、start_time、end_time、title、create_time、last_modified |          | 处理添加广告请求   |
 |          |             |            |                                                                      |          |                    |
 
-## 晚自习补课
+
 
 - jsonp
 - nvm
